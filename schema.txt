@@ -1,0 +1,88 @@
+ProductType
+-
+ID PK int
+Name UNIQUE string
+Description NULL string
+CreatedAt datetime
+UpdatedAt datetime
+
+Product
+-
+ID PK int
+ProductTypeID int FK >- ProductType.ID
+Name string
+SKU UNIQUE string
+IsFinal boolean
+CreatedAt datetime
+UpdatedAt datetime
+
+PickingPeriod
+-
+ID PK int
+Name UNIQUE string
+StartDate date
+EndDate date
+Notes NULL string
+CreatedAt datetime
+UpdatedAt datetime
+
+Room
+-
+ID PK int
+Name UNIQUE string
+Description NULL string
+CreatedAt datetime
+UpdatedAt datetime
+
+Unit
+-
+ID PK int
+Name UNIQUE string
+ConversionToKg decimal(10,0)
+CreatedAt datetime
+UpdatedAt datetime
+
+MovementType
+-
+ID PK int
+Name UNIQUE string
+Description NULL string
+CreatedAt datetime
+UpdatedAt datetime
+
+Provider
+-
+ID PK int
+Name string
+Note NULL string
+CreatedAt datetime
+UpdatedAt datetime
+
+Taker
+-
+ID PK int
+Name string
+Note NULL string
+CreatedAt datetime
+UpdatedAt datetime
+
+Transaction
+-
+ID PK int
+ProductID int FK >- Product.ID
+Quantity decimal(12,0)
+QuantityInKg decimal(12,0)
+UnitID int FK >- Unit.ID
+Date INDEX date
+Notes NULL string
+CreatedAt datetime
+UpdatedAt datetime
+ToRoomID NULL int FK >- Room.ID
+FromRoomID NULL int FK >- Room.ID
+FromProviderID NULL int FK >- Provider.ID
+ToTakerID NULL int FK >- Taker.ID
+PickingPeriodID NULL int FK >- PickingPeriod.ID
+MovementTypeID int FK >- MovementType.ID
+UnitPrice decimal(12,0) NULL
+TotalCost decimal(14,0) NULL
+Currency string
