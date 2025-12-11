@@ -1,8 +1,7 @@
 from .base import *
-from decouple import config
 
 DEBUG = True
-SECRET_KEY = config('SECRET_KEY', default='dev-secret-key')
+SECRET_KEY = 'dev-secret-key'
 ALLOWED_HOSTS = ['*']
 
 DATABASES = {
