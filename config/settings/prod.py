@@ -44,10 +44,13 @@ DATABASES = {
 
 # --- Static & Media ---
 STATIC_URL = "/static/"
-STATIC_ROOT = "/home1/salidevl/ttapi.salidevlab.ir/static"
+STATIC_ROOT = "/home1/salidevl/teatracer-api.salidevlab.ir/static"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = "/home1/salidevl/ttapi.salidevlab.ir/media"
+MEDIA_ROOT = "/home1/salidevl/teatracer-api.salidevlab.ir/media"
 
 # Disable Django’s default debug toolbar signals
 DEBUG_PROPAGATE_EXCEPTIONS = False
+
+# Github secret for deploy
+GITHUB_WEBHOOK_SECRET = config("GITHUB_WEBHOOK_SECRET")
