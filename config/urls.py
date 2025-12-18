@@ -25,7 +25,7 @@ urlpatterns = [
     
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api-auth/', include('rest_framework.urls')),
-    # re_path(r'^$', lambda request: redirect('/api/v1/', permanent=False)),
+    re_path(r'^$', lambda request: redirect('/api/v1/', permanent=False)),
     # path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     # path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     # path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
@@ -33,7 +33,8 @@ urlpatterns = [
 
 
 
-    path('api/v1/', include('account.urls')),
+    path('api/v1/', include('accounts.urls')),
+    path('api/v1/', include('general.urls')),
     path('', lambda request: redirect('schema-swagger-ui', permanent=False), name="index page"),
         
 

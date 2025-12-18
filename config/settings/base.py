@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     # My app
-    'account',
+    'accounts',
+    'general',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# TODO: set custom user for later develop: make sure it is sync with model in account later
+AUTH_USER_MODEL = "accounts.User"

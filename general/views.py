@@ -1,8 +1,5 @@
 import subprocess
-import json
 from rest_framework.permissions import AllowAny
-
-
 from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,11 +8,12 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
-class TestApiView(APIView):
+
+class GetVersionApiView(APIView):
     permission_classes = [AllowAny]
     @extend_schema(
-        summary="Test API endpoint",
-        description="Returns a simple hello message",
+        summary="Get Version API endpoint",
+        description="Returns a Current version of the API",
         responses={200: dict}
     )
     def get(self, request):
