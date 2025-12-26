@@ -13,3 +13,8 @@
 
 .env
 db.sqlite3
+
+*.log
+**/migrations/**
+!**/migrations/__init__.py
+.well-known

@@ -1,6 +1,5 @@
 asgiref==3.11.0
 attrs==25.4.0
-decouple==0.0.7
 Django==5.2.9
 django-cors-headers==4.9.0
 django-filter==25.2
@@ -13,6 +12,7 @@ jsonschema-specifications==2025.9.1
 Markdown==3.10
 packaging==25.0
 PyMySQL==1.1.2
+python-decouple==3.8
 pytz==2025.2
 PyYAML==6.0.3
 referencing==0.37.0
