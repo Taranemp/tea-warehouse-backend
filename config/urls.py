@@ -35,6 +35,8 @@ urlpatterns = [
 
     path('api/v1/', include('accounts.urls')),
     path('api/v1/', include('general.urls')),
+    path('api/v1/', include('teatracer.urls')),
+
     path('', lambda request: redirect('schema-swagger-ui', permanent=False), name="index page"),
         
 
