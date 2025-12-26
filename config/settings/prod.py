@@ -2,12 +2,14 @@ from .base import *
 import os
 from decouple import Config, RepositoryEnv
 
-ENV_PATH = "/home1/salidevl/teatracer-api.salidevlab.ir/backend/.env"
+ENV_PATH = Path("/home1/salidevl/teatracer-api.salidevlab.ir/backend/.env")
 
-if os.path.exists(ENV_PATH):
-    config = Config(repository=RepositoryEnv(ENV_PATH))
+if ENV_PATH.exists():
+    config = Config(RepositoryEnv(str(ENV_PATH)))
+else:
+    from decouple import config
 
-
+    
 DEBUG = False
 
 # --- Security ---
