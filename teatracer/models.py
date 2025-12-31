@@ -39,6 +39,7 @@ class Product(models.Model):
 
 class Provider(models.Model):
     name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=20, blank=True, null=True)
     note = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -49,7 +50,9 @@ class Provider(models.Model):
 
 class Taker(models.Model):
     name = models.CharField(max_length=150)
+    phone = models.CharField(max_length=20, blank=True, null=True)
     note = models.TextField(null=True, blank=True)
+    address = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
