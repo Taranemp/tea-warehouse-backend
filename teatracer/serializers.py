@@ -8,6 +8,7 @@ from .models import (
     Room,
     PickingPeriod,
     MovementType,
+    Transaction,
 )
 
 
@@ -57,3 +58,16 @@ class MovementTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = MovementType
         fields = "__all__"
+
+
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+    read_only_fields = (
+            'created_at',
+            'updated_at',
+            'total_cost',
+        )

@@ -1,6 +1,13 @@
 from decimal import Decimal
 
-def calculate_total_cost(quantity, unit_price):
-    if quantity is None or unit_price is None:
-        return None
-    return quantity * unit_price
+def calculate_transaction_total_cost(transaction):
+    
+    if transaction.quantity and transaction.unit_price:
+        transaction.total_cost = (
+            Decimal(transaction.quantity) * Decimal(transaction.unit_price)
+        )
+    else:
+        transaction.total_cost = None
+
+    transaction.save(update_fields=["total_cost"])
+    return transaction
