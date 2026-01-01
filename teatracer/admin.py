@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import Unit,ProductType,Product,Provider,Taker,Room,PickingPeriod,MovementType
 
-
 class ProductInline(admin.TabularInline):
     model = Product
     extra = 0
