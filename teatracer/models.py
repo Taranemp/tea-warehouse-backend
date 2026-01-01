@@ -95,6 +95,12 @@ class Transaction(models.Model):
 
     Tracks product quantities, pricing, and related metadata for inventory management.
     """
+    producttype = models.ForeignKey(
+        ProductType,
+        on_delete=models.PROTECT,
+        related_name="transactions"
+    )
+    
     product = models.ForeignKey(
         Product,
         on_delete=models.PROTECT,
