@@ -9,3 +9,4 @@ from .rooms import create_rooms
 from .picking_periods import create_picking_periods
 from .movement_types import create_movement_types
 from .transactions import create_transactions
+from .currency import create_currencies

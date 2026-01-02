@@ -1,14 +1,15 @@
 from django.contrib import admin
 from .models import (
-    Unit,
+    Currency,
+    MovementType,
+    PickingPeriod,
     ProductType,
     Product,
     Provider,
-    Taker,
     Room,
-    PickingPeriod,
-    MovementType,
+    Taker,
     Transaction,
+    Unit,
 )
 
 # ----------------------------
@@ -58,6 +59,18 @@ class UnitAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "conversion_to_kg", "created_at")
     search_fields = ("name",)
     ordering = ("name",)
+    readonly_fields = ("created_at", "updated_at")
+
+
+
+# ----------------------------
+# Currency
+# ----------------------------
+
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "ratio", "created_at")
+    ordering = ("id",)
     readonly_fields = ("created_at", "updated_at")
 
 

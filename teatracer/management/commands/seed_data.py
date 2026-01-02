@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from teatracer.management.commands.seed_helpers import (
+    create_currencies,
     remove_and_migrate_db,
     create_super_user,
     create_units,
@@ -22,6 +23,9 @@ class Command(BaseCommand):
         # remove old database, create superuser
         remove_and_migrate_db(self.stdout)
         create_super_user(self.stdout)
+
+        providers_dict = {'IRR': 1, 'USD': 10}
+        ctx["currencies"] = create_currencies(providers_dict, self.stdout)
 
         # units and periods
         ctx["units"] = create_units(self.stdout)

@@ -6,7 +6,7 @@ def create_transactions(ctx, stdout):
     today = timezone.now().date()
 
     # ----------------------------
-    # Inbound - ورود چای به کارخانه
+    # Inbound
     # ----------------------------
     inbound_data = [
         ("Leaf G1", "Provider 1", "Intake Room", 100),
@@ -25,7 +25,7 @@ def create_transactions(ctx, stdout):
             to_room=ctx["rooms"][room_key],
             movement_type=ctx["movement_types"]["Inbound"],
             unit_price=Decimal("300"),
-            currency="IRR",
+            currency=ctx["currencies"]["IRR"],
             picking_period=ctx["picking_periods"]["spring"],
         )
 
@@ -58,11 +58,11 @@ def create_transactions(ctx, stdout):
             from_room=ctx["rooms"][from_room_key],
             to_room=ctx["rooms"][to_room_key],
             movement_type=ctx["movement_types"]["Internal Transfer"],
-            currency="IRR",
+            currency=ctx["currencies"]["IRR"],
         )
 
     # ----------------------------
-    # Outbound - ارسال به مشتری / فروش
+    # Outbound
     # ----------------------------
     outbound_data = [
         ("Mix Tea AB", "Packaging Room", None, 10),
@@ -79,7 +79,7 @@ def create_transactions(ctx, stdout):
             to_taker=ctx["takers"].get(to_taker_key, None),
             to_room=None,
             movement_type=ctx["movement_types"]["Outbound"],
-            currency="IRR",
+            currency=ctx["currencies"]["IRR"],
         )
 
     stdout.write("Transactions seeded successfully")

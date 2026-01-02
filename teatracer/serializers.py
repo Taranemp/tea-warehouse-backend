@@ -1,16 +1,23 @@
 from rest_framework import serializers
 from .models import (
-    Unit,
+    Currency,
+    MovementType,
+    PickingPeriod,
     ProductType,
     Product,
     Provider,
-    Taker,
     Room,
-    PickingPeriod,
-    MovementType,
+    Taker,
     Transaction,
+    Unit,
 )
 
+
+
+class CurrencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = "__all__"
 
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:

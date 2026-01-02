@@ -1,6 +1,17 @@
 from django.db import models
 
 
+
+class Currency(models.Model):
+    name = models.CharField(max_length=100)
+    ratio = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Unit(models.Model):
     name = models.CharField(max_length=100)
     conversion_to_kg = models.DecimalField(max_digits=10, decimal_places=2)
@@ -93,23 +104,21 @@ class MovementType(models.Model):
 
 
 class Transaction(models.Model):
-    """
-    Transaction model representing movements of products between rooms, providers, and takers.
-
-    Tracks product quantities, pricing, and related metadata for inventory management.
-    """
     product = models.ForeignKey(
         Product,
         on_delete=models.PROTECT,
         related_name="transactions"
     )
+
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
     quantity_in_kg = models.DecimalField(max_digits=12, decimal_places=3)
+
     unit = models.ForeignKey(
         Unit,
         on_delete=models.PROTECT,
         related_name="transactions"
     )
+
     date = models.DateField(db_index=True)
     notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -174,7 +183,11 @@ class Transaction(models.Model):
         null=True,
         blank=True
     )
-    currency = models.CharField(max_length=10)
+    currency = models.ForeignKey(
+        Currency,
+        on_delete=models.PROTECT,
+        related_name="transactions"
+    )
 
     class Meta:
         ordering = ['-date', '-created_at']
