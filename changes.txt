@@ -1,0 +1,5 @@
+remove product type from transaction
+remove seed_data for accoint and teatracer
+create new seed_data that reset all steps
+improve seed data in seed_data command
+rewrite the admin.py for transaction

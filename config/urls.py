@@ -26,9 +26,10 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     re_path(r'^$', lambda request: redirect('swagger/', permanent=False)),
 
-    path('api/v1/', include('accounts.urls')),
-    path('api/v1/', include('general.urls')),
-    path('api/v1/', include('teatracer.urls')),
+    path('api/v1/', include('accounts.urls'), name='account-api'),
+
+    path('api/v1/', include('general.urls'), name='general-api'),
+    path('api/v1/', include('teatracer.urls'), name='teatracer-api'),
 
     path('', lambda request: redirect('schema-swagger-ui', permanent=False), name="index page"),
         
