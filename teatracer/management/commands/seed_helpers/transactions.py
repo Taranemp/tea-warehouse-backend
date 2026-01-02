@@ -30,7 +30,7 @@ def create_transactions(ctx, stdout):
         )
 
     # ----------------------------
-    # Internal Transfer - انتقال داخلی بین اتاق‌ها
+    # Internal Transfer
     # ----------------------------
     internal_moves = [
         # Process Room
