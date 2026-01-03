@@ -17,7 +17,7 @@ class GetVersionApiView(APIView):
         responses={200: dict}
     )
     def get(self, request):
-        return Response({"message": "This is version v0.0.4"}, status=status.HTTP_200_OK)
+        return Response({"message": "This is version v0.0.5"}, status=status.HTTP_200_OK)
 
 
 
