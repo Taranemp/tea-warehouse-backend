@@ -1,7 +1,5 @@
 from django.db import models
 
-
-
 class Currency(models.Model):
     name = models.CharField(max_length=100)
     ratio = models.DecimalField(max_digits=10, decimal_places=2)
@@ -93,9 +91,8 @@ class PickingPeriod(models.Model):
         return self.name
 
 
-class MovementType(models.Model):
+class TransactionType(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -104,97 +101,107 @@ class MovementType(models.Model):
 
 
 class Transaction(models.Model):
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.PROTECT,
-        related_name="transactions"
-    )
+    """
+    Represents a transaction linked to a single room.
+    Users can only access their own room's transactions.
+    """
 
-    quantity = models.DecimalField(max_digits=12, decimal_places=3)
-    quantity_in_kg = models.DecimalField(max_digits=12, decimal_places=3)
-
-    unit = models.ForeignKey(
-        Unit,
-        on_delete=models.PROTECT,
-        related_name="transactions"
-    )
+    transaction_type = models.ForeignKey("TransactionType", on_delete=models.PROTECT)
 
     date = models.DateField(db_index=True)
     notes = models.TextField(null=True, blank=True)
+    picking_period = models.ForeignKey(
+        "PickingPeriod",
+        on_delete=models.PROTECT,
+        null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    # Room relationships (for internal movements)
-    to_room = models.ForeignKey(
-        Room,
-        on_delete=models.PROTECT,
-        related_name="transactions_to",
-        null=True,
-        blank=True
-    )
-    from_room = models.ForeignKey(
-        Room,
-        on_delete=models.PROTECT,
-        related_name="transactions_from",
-        null=True,
-        blank=True
-    )
-    
-    # External relationships
-    from_provider = models.ForeignKey(
-        Provider,
-        on_delete=models.PROTECT,
-        related_name="transactions",
-        null=True,
-        blank=True
-    )
-    to_taker = models.ForeignKey(
-        Taker,
-        on_delete=models.PROTECT,
-        related_name="transactions",
-        null=True,
-        blank=True
-    )
-    
-    # Optional relationships
-    picking_period = models.ForeignKey(
-        PickingPeriod,
-        on_delete=models.PROTECT,
-        related_name="transactions",
-        null=True,
-        blank=True
-    )
-    movement_type = models.ForeignKey(
-        MovementType,
-        on_delete=models.PROTECT,
-        related_name="transactions"
-    )
-    
-    # Pricing fields
-    unit_price = models.DecimalField(
-        max_digits=12,
-        decimal_places=0,
-        null=True,
-        blank=True
-    )
-    total_cost = models.DecimalField(
-        max_digits=14,
-        decimal_places=0,
-        null=True,
-        blank=True
-    )
-    currency = models.ForeignKey(
-        Currency,
-        on_delete=models.PROTECT,
-        related_name="transactions"
-    )
-
-    class Meta:
-        ordering = ['-date', '-created_at']
-        indexes = [
-            models.Index(fields=['date']),
-            models.Index(fields=['product', 'date']),
-        ]
 
     def __str__(self):
-        return f"{self.product.name} - {self.quantity} {self.unit.name} on {self.date}"
+        return f"Transaction {self.id} - {self.date}"
+
+    class Meta:
+        verbose_name = "1. Transaction"
+        verbose_name_plural = "1. Transactions"
+
+
+
+
+class AddedProduct(models.Model):
+    """
+    Products added in a transaction.
+    This includes metadata for later reporting.
+    """
+    transaction = models.ForeignKey(
+        Transaction,
+        on_delete=models.CASCADE,
+        related_name="added_products"
+    )
+    product = models.ForeignKey("Product", on_delete=models.PROTECT)
+    quantity = models.DecimalField(max_digits=12, decimal_places=3)
+    unit = models.ForeignKey("Unit", on_delete=models.PROTECT)
+    quantity_in_kg = models.DecimalField(max_digits=12, decimal_places=3, editable=False)
+
+    # metadata
+    to_room = models.ForeignKey("Room", on_delete=models.PROTECT, null=True, blank=True, related_name="+")
+    from_room = models.ForeignKey("Room", on_delete=models.PROTECT, null=True, blank=True, related_name="+")
+    provider = models.ForeignKey("Provider", on_delete=models.PROTECT, null=True, blank=True)
+    taker = models.ForeignKey("Taker", on_delete=models.PROTECT, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.unit and self.quantity:
+            self.quantity_in_kg = self.quantity * self.unit.conversion_to_kg
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Added {self.quantity} {self.unit.name} of {self.product.name}"
+
+    class Meta:
+        verbose_name = "2. Added Product"
+        verbose_name_plural = "2. Added Products"
+
+
+class RemovedProduct(models.Model):
+    """
+    Products removed in a transaction.
+    This includes metadata for later reporting.
+    """
+    transaction = models.ForeignKey(
+        Transaction,
+        on_delete=models.CASCADE,
+        related_name="removed_products"
+    )
+    product = models.ForeignKey("Product", on_delete=models.PROTECT)
+    quantity = models.DecimalField(max_digits=12, decimal_places=3)
+    unit = models.ForeignKey("Unit", on_delete=models.PROTECT)
+    quantity_in_kg = models.DecimalField(max_digits=12, decimal_places=3, editable=False)
+
+    # metadata
+    to_room = models.ForeignKey("Room", on_delete=models.PROTECT, null=True, blank=True, related_name="+")
+    from_room = models.ForeignKey("Room", on_delete=models.PROTECT, null=True, blank=True, related_name="+")
+    provider = models.ForeignKey("Provider", on_delete=models.PROTECT, null=True, blank=True)
+    taker = models.ForeignKey("Taker", on_delete=models.PROTECT, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.unit and self.quantity:
+            self.quantity_in_kg = self.quantity * self.unit.conversion_to_kg
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Removed {self.quantity} {self.unit.name} of {self.product.name}"
+
+    class Meta:
+        verbose_name = "3. Removed Product"
+        verbose_name_plural = "3. Removed Products"
+
+
+

@@ -23,7 +23,10 @@ def create_products(product_types, stdout):
         "Leaf G3": create_or_link_product(
             name= "Leaf G3", sku= "G3", product_type=product_types["black tea"], stdout=stdout
         ),
-        "Processed leaf": create_or_link_product(
+        "Mix Leaf": create_or_link_product(
+            name="Mix Leaf", sku="G123", product_type=product_types["black tea"], stdout=stdout
+        ),
+        "Processed Leaf": create_or_link_product(
             name= "Processed leaf", sku= "Proc", product_type=product_types["black tea"], stdout=stdout
         ),
         "Sort A": create_or_link_product(

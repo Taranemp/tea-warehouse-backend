@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import (
     Currency,
-    MovementType,
     PickingPeriod,
     ProductType,
     Product,
@@ -10,8 +9,10 @@ from .models import (
     Taker,
     Transaction,
     Unit,
+    AddedProduct,
+    RemovedProduct,
+    TransactionType,
 )
-
 
 
 class CurrencySerializer(serializers.ModelSerializer):
@@ -24,36 +25,35 @@ class UnitSerializer(serializers.ModelSerializer):
         model = Unit
         fields = "__all__"
 
-
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductType
         fields = "__all__"
-
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
 
-
 class ProviderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Provider
         fields = "__all__"
-
 
 class TakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Taker
         fields = "__all__"
 
-
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = "__all__"
 
+class TransactionTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionType
+        fields = "__all__"
 
 class PickingPeriodSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,50 +61,125 @@ class PickingPeriodSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class MovementTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MovementType
-        fields = "__all__"
-
-
-
-
-class TransactionSerializer(serializers.ModelSerializer):
-    total_cost = serializers.DecimalField(
-        max_digits=18,
-        decimal_places=2,
+class AddedProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        source="product",
+        write_only=True
+    )
+    unit = UnitSerializer(read_only=True)
+    unit_id = serializers.PrimaryKeyRelatedField(
+        queryset=Unit.objects.all(),
+        source="unit",
+        write_only=True
+    )
+    quantity_in_kg = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=3,
         read_only=True
     )
 
     class Meta:
+        model = AddedProduct
+        fields = [
+            "id",
+            "product",
+            "product_id",
+            "quantity",
+            "unit",
+            "unit_id",
+            "quantity_in_kg",
+            "from_room",
+            "provider",
+            "taker",
+            "notes",
+        ]
+
+
+class RemovedProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        source="product",
+        write_only=True
+    )
+    unit = UnitSerializer(read_only=True)
+    unit_id = serializers.PrimaryKeyRelatedField(
+        queryset=Unit.objects.all(),
+        source="unit",
+        write_only=True
+    )
+    quantity_in_kg = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=3,
+        read_only=True
+    )
+
+    class Meta:
+        model = RemovedProduct
+        fields = [
+            "id",
+            "product",
+            "product_id",
+            "quantity",
+            "unit",
+            "unit_id",
+            "quantity_in_kg",
+            "to_room",
+            "provider",
+            "taker",
+            "notes",
+        ]
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    added_products = AddedProductSerializer(many=True)
+    removed_products = RemovedProductSerializer(many=True)
+
+    class Meta:
         model = Transaction
-        fields = "__all__"
-
-    def _calculate_total_cost(self, validated_data):
-        unit_price = validated_data.get("unit_price")
-        quantity = validated_data.get("quantity")
-
-        if unit_price is None:
-            return None
-
-        return quantity * unit_price
+        fields = [
+            "id",
+            "date",
+            "notes",
+            "picking_period",
+            "added_products",
+            "removed_products",
+            "created_at",
+            "updated_at",
+        ]
 
     def create(self, validated_data):
-        validated_data["total_cost"] = self._calculate_total_cost(validated_data)
-        return super().create(validated_data)
+        added_data = validated_data.pop("added_products", [])
+        removed_data = validated_data.pop("removed_products", [])
+
+        transaction = Transaction.objects.create(**validated_data)
+
+        for item in added_data:
+            AddedProduct.objects.create(transaction=transaction, **item)
+
+        for item in removed_data:
+            RemovedProduct.objects.create(transaction=transaction, **item)
+
+        return transaction
 
     def update(self, instance, validated_data):
-        instance.unit_price = validated_data.get(
-            "unit_price", instance.unit_price
-        )
-        instance.quantity = validated_data.get(
-            "quantity", instance.quantity
-        )
+        added_data = validated_data.pop("added_products", [])
+        removed_data = validated_data.pop("removed_products", [])
 
-        if instance.unit_price is None:
-            instance.total_cost = None
-        else:
-            instance.total_cost = instance.quantity * instance.unit_price
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
 
-        return super().update(instance, validated_data)
+        # حذف و بازساخت محصولات
+        instance.added_products.all().delete()
+        instance.removed_products.all().delete()
 
+        for item in added_data:
+            AddedProduct.objects.create(transaction=instance, **item)
+
+        for item in removed_data:
+            RemovedProduct.objects.create(transaction=instance, **item)
+
+        return instance

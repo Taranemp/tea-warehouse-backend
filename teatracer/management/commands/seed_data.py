@@ -10,8 +10,8 @@ from teatracer.management.commands.seed_helpers import (
     create_takers,
     create_rooms,
     create_picking_periods,
-    create_movement_types,
     create_transactions,
+    create_transaction_types,
 )
 
 class Command(BaseCommand):
@@ -47,12 +47,12 @@ class Command(BaseCommand):
 
 
         # rooms
-        rooms_list = ["Intake Room", "Process Room", "Processed Stock Room", "Sorting Room", "Mixing Room", "Packaging Room"]
+        rooms_list = ["Intake Room", "Process Room", "Sorting Room", "Mixing Room", "Packaging Room"]
         ctx["rooms"] = create_rooms(rooms_list, self.stdout)
 
+        # TransactionType
+        transaction_types_list = ["Intake", 'Mixing', 'Processing', 'Sorting', 'Packaging']
+        ctx["transaction_types"] = create_transaction_types(transaction_types_list, self.stdout)
 
-        # movement_types
-        movement_types_list = "Inbound", "Outbound", "Internal Transfer", "Process", "MixSort"
-        ctx["movement_types"] = create_movement_types(movement_types_list, self.stdout)
 
         create_transactions(ctx, self.stdout)

@@ -1,7 +1,6 @@
 from django.contrib import admin
 from .models import (
     Currency,
-    MovementType,
     PickingPeriod,
     ProductType,
     Product,
@@ -9,7 +8,10 @@ from .models import (
     Room,
     Taker,
     Transaction,
+    AddedProduct,
+    RemovedProduct,
     Unit,
+    TransactionType,
 )
 
 # ----------------------------
@@ -85,6 +87,11 @@ class ProviderAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
 
 
+@admin.register(TransactionType)
+class TransactionTypeAdmin(admin.ModelAdmin):
+    pass
+
+
 # ----------------------------
 # Taker
 # ----------------------------
@@ -121,22 +128,51 @@ class PickingPeriodAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
 
 
-# ----------------------------
-# MovementType
-# ----------------------------
-
-@admin.register(MovementType)
-class MovementTypeAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "created_at")
-    search_fields = ("name",)
-    ordering = ("name",)
-    readonly_fields = ("created_at", "updated_at")
 
 
-# ----------------------------
-# Transaction
-# ----------------------------
 
+# -----------------------------
+# Inline برای added_products و removed_products
+# -----------------------------
+class AddedProductInline(admin.TabularInline):
+    model = AddedProduct
+    extra = 1
+    autocomplete_fields = ("product", "unit", "from_room", "provider", "taker")
+    readonly_fields = ("quantity_in_kg",)
+    fields = (
+        "product",
+        "quantity",
+        "unit",
+        "quantity_in_kg",
+        "to_room",
+        "from_room",
+        "provider",
+        "taker",
+        "notes",
+    )
+
+
+class RemovedProductInline(admin.TabularInline):
+    model = RemovedProduct
+    extra = 1
+    autocomplete_fields = ("product", "unit", "to_room", "provider", "taker")
+    readonly_fields = ("quantity_in_kg",)
+    fields = (
+        "product",
+        "quantity",
+        "unit",
+        "quantity_in_kg",
+        "to_room",
+        "from_room",
+        "provider",
+        "taker",
+        "notes",
+    )
+
+
+# -----------------------------
+# Admin Transaction
+# -----------------------------
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
     date_hierarchy = "date"
@@ -144,128 +180,87 @@ class TransactionAdmin(admin.ModelAdmin):
 
     list_display = (
         "id",
+        "transaction_type",
         "date",
-        "product",
-        "movement_type",
-        "quantity_display",
-        "from_location",
-        "to_location",
-        "unit_price",
-        "total_cost_display",
-        "currency",
         "picking_period",
         "created_at",
     )
 
     list_filter = (
-        "movement_type",
-        "currency",
-        "product",
-        "unit",
         "picking_period",
-        "from_provider",
-        "to_taker",
-        "from_room",
-        "to_room",
         "date",
     )
 
     search_fields = (
-        "product__name",
-        "from_provider__name",
-        "to_taker__name",
         "notes",
     )
 
-    readonly_fields = (
-        "created_at",
-        "updated_at",
-        "quantity_in_kg",
-        "total_cost",
-    )
+    readonly_fields = ("created_at", "updated_at")
 
     fieldsets = (
-        ("Core Information", {
-            "fields": ("product", "movement_type", "date", "notes")
+        ("Core", {
+            "fields": ("transaction_type", "notes")
         }),
-        ("Quantity", {
-            "fields": ("quantity", "unit", "quantity_in_kg")
+        ("Period", {
+            "fields": ("picking_period",)
         }),
-        ("Locations (Internal)", {
-            "fields": ("from_room", "to_room")
-        }),
-        ("External Parties", {
-            "fields": ("from_provider", "to_taker")
-        }),
-        ("Period & Pricing", {
-            "fields": ("picking_period", "unit_price", "total_cost", "currency")
-        }),
-        ("System Fields", {
+        ("System", {
             "fields": ("created_at", "updated_at")
         }),
     )
 
     autocomplete_fields = (
-        "product",
-        "unit",
-        "from_room",
-        "to_room",
-        "from_provider",
-        "to_taker",
         "picking_period",
-        "movement_type",
     )
 
     list_select_related = (
-        "product",
-        "unit",
-        "movement_type",
-        "from_room",
-        "to_room",
-        "from_provider",
-        "to_taker",
         "picking_period",
     )
 
     ordering = ("-date", "-created_at")
 
-    # ----------------------------
-    # Display helpers
-    # ----------------------------
+    inlines = [
+        AddedProductInline,
+        RemovedProductInline,
+    ]
 
-    @admin.display(description="Quantity")
-    def quantity_display(self, obj):
-        return f"{obj.quantity} {obj.unit.name}"
 
-    @admin.display(description="From")
-    def from_location(self, obj):
-        if obj.from_room:
-            return f"Room: {obj.from_room.name}"
-        if obj.from_provider:
-            return f"Provider: {obj.from_provider.name}"
-        return "-"
+# -----------------------------
+# Admin AddedProduct و RemovedProduct جداگانه (برای دسترسی مستقیم)
+# -----------------------------
+@admin.register(AddedProduct)
+class AddedProductAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "transaction",
+        "product",
+        "quantity",
+        "unit",
+        "quantity_in_kg",
+        "from_room",
+        "to_room",
+        "provider",
+        "taker",
+        "created_at",
+    )
+    search_fields = ("product__name", "transaction__room__name", "from_room__name")
+    list_filter = ("unit", "from_room", "provider", "taker")
 
-    @admin.display(description="To")
-    def to_location(self, obj):
-        if obj.to_room:
-            return f"Room: {obj.to_room.name}"
-        if obj.to_taker:
-            return f"Taker: {obj.to_taker.name}"
-        return "-"
 
-    @admin.display(description="Total Cost")
-    def total_cost_display(self, obj):
-        if obj.total_cost:
-            return f"{obj.total_cost} {obj.currency}"
-        return "-"
-
-    # ----------------------------
-    # Auto calculations
-    # ----------------------------
-
-    def save_model(self, request, obj, form, change):
-        if obj.unit and obj.quantity:
-            obj.quantity_in_kg = obj.quantity * obj.unit.conversion_to_kg
-        if obj.unit_price:
-            obj.total_cost = obj.unit_price * obj.quantity
-        super().save_model(request, obj, form, change)
+@admin.register(RemovedProduct)
+class RemovedProductAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "transaction",
+        "product",
+        "quantity",
+        "unit",
+        "quantity_in_kg",
+        "from_room",
+        "to_room",
+        "provider",
+        "taker",
+        "created_at",
+    )
+    search_fields = ("product__name", "transaction__room__name", "to_room__name")
+    list_filter = ("unit", "to_room", "provider", "taker")
