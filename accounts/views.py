@@ -21,6 +21,7 @@ class RegisterView(APIView):
 
 
 class ObtainAuthTokenView(APIView):
+    permission_classes = [AllowAny]
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,

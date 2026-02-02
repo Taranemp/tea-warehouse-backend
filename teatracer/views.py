@@ -11,6 +11,7 @@ from .models import (
     Currency,
     AddedProduct,
     RemovedProduct,
+    TransactionType,
 )
 from .serializers import (
     PickingPeriodSerializer,
@@ -22,6 +23,7 @@ from .serializers import (
     UnitSerializer,
     CurrencySerializer,
     TransactionSerializer,
+    TransactionTypeSerializer,
     AddedProductSerializer,
     RemovedProductSerializer,
 )
@@ -77,6 +79,10 @@ class UnitViewSet(ModelViewSet):
 class PickingPeriodViewSet(ModelViewSet):
     queryset = PickingPeriod.objects.all()
     serializer_class = PickingPeriodSerializer
+
+class TransactionTypeViewSet(ModelViewSet):
+    queryset = TransactionType.objects.all()
+    serializer_class = TransactionTypeSerializer
 
 
 # ----------------------------
