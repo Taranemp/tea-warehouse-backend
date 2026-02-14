@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
 from .models import (
     Currency,
     PickingPeriod,
@@ -12,6 +14,7 @@ from .models import (
     RemovedProduct,
     Unit,
     TransactionType,
+    UserProfile,
 )
 
 # ----------------------------
@@ -202,7 +205,7 @@ class TransactionAdmin(admin.ModelAdmin):
             "fields": ("transaction_type", "notes")
         }),
         ("Period", {
-            "fields": ("picking_period",)
+            "fields": ("picking_period","date")
         }),
         ("System", {
             "fields": ("created_at", "updated_at")
@@ -264,3 +267,16 @@ class RemovedProductAdmin(admin.ModelAdmin):
     )
     search_fields = ("product__name", "transaction__room__name", "to_room__name")
     list_filter = ("unit", "to_room", "provider", "taker")
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "user_room")
+    list_select_related = ("user", "user_room")
+
+    
+
+    list_filter = ("user_room",)
+
+    autocomplete_fields = ("user", "user_room")
+
+    ordering = ("user",)
