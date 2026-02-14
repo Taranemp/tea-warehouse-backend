@@ -158,7 +158,8 @@ def inventory_report(request):
     result = {}
 
     # ---- Room access control ----
-    if request.user.groups.filter(name="Manager").exists():
+    if request.user.has_perm("teatracer.view_all_rooms"):
+
         rooms = Room.objects.all()
 
     else:
