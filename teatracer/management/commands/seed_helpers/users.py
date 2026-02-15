@@ -20,3 +20,32 @@ def create_super_user(stdout):
         email=email,
     )
     stdout.write("Superuser created")
+
+
+
+
+# TODO: Delete later
+# ------------------------------------------------
+# - [ ] username: accountant01, supervisor01, inventory_man_room_01, inventory_man_room_02
+# - [ ] password set for all 'Admin@123'
+# - [ ] create three group: RoomManagersGroup, AccountantsGroup, SupervisorGroup
+
+def run_all_users_groups_permissions():
+    create_accountants()
+    create_supervisor()
+    create_inventory_man()
+    create_user_groups()
+    
+
+
+def create_accountants():
+    pass
+
+def create_supervisor():
+    pass
+
+def create_inventory_man():
+    pass
+
+def create_user_groups():
+    pass
